@@ -1,0 +1,22 @@
+{
+  "short_name": "NexusGrowth",
+  "name": "NEXUS-GROWTH Financial Engine",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "background_color": "#080E1A",
+  "theme_color": "#00FF66",
+  "display": "standalone",
+  "orientation": "portrait"
+}
