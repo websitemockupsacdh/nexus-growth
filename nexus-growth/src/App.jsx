@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import './App.css'
+import React, { useState, useEffect, useMemo } from 'react';
+import './App.css';
 
 // --- DAILY FINANCE & GROWTH QUOTES ---
 const DAILY_QUOTES = [
@@ -12,6 +12,16 @@ const DAILY_QUOTES = [
   { quote: "The habit of saving is itself an education; it fosters every virtue.", author: "T.T. Munger" },
   { quote: "It’s not how much money you make, but how much money you keep.", author: "Robert Kiyosaki" }
 ];
+
+// Helper to compute daily quote based on the current day of the year
+function getDailyQuote() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const dayOfYear = Math.floor(diff / oneDay);
+  return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -62,13 +72,8 @@ export default function App() {
     localStorage.setItem('nexus_caps', JSON.stringify(budgetCaps));
   }, [budgetCaps]);
 
-  // Dynamic Daily Quote Selection
-  const todayQuote = useEffectDayQuote();
-
-  function useEffectDayQuote() {
-    const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-    return DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
-  }
+  // Memoize Daily Quote Selection
+  const todayQuote = useMemo(() => getDailyQuote(), []);
 
   // --- ANALYTICS & COMPUTATION ENGINE ---
   const totalProjectedIncome = incomeEntries.reduce((acc, curr) => acc + (Number(curr.projected) || 0), 0);
@@ -111,9 +116,13 @@ export default function App() {
   const addExpense = (e) => {
     e.preventDefault();
     if (!expDesc || !expAmt) return;
+
+    const today = new Date();
+    const localDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
     const newItem = {
       id: Date.now(),
-      date: new Date().toISOString().split('T')[0],
+      date: localDate,
       description: expDesc,
       category: expCat,
       payment: expPay,
@@ -135,7 +144,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between p-4 md:p-8 max-w-7xl mx-auto">
+    <div className="min-h-screen flex flex-col justify-between p-4 md:p-8 max-w-7xl mx-auto text-slate-200">
       {/* --- HEADER NAVIGATION & BRANDING --- */}
       <header className="glass-panel rounded-2xl p-4 md:p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
@@ -614,7 +623,9 @@ export default function App() {
       {/* --- FOOTER --- */}
       <footer className="mt-8 pt-4 border-t border-slate-800/80 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 font-mono gap-2">
         <div>NEXUS-GROWTH v2.4 // POWERED BY ACDH CREATIVES</div>
-        <div>OPERATING MODE: OFFLINE-ENABLED (LOCALSTORAGE ENGINE)</div>
+        <div>
+          OPERATING MODE: <span className="text-[#00FF66] font-bold">LOCAL OFFLINE / ENCRYPTED</span>
+        </div>
       </footer>
     </div>
   );
